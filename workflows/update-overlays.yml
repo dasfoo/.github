@@ -1,0 +1,44 @@
+on:
+  push:
+  schedule:
+    # Every day at 2:07 UTC: https://crontab.guru/#7_2_*_*_*
+    - cron: "7 2 * * *"
+
+jobs:
+  fastlane-update:
+    # Do not run on forks.
+    if: startsWith(github.repository, 'dasfoo/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # We need full history to be able to create a PR.
+          fetch-depth: 0
+
+      # Copy over shared workflow overlays.
+      - uses: actions/checkout@v2
+        with:
+          repository: dasfoo/.github
+          path: tmp/.github
+      - run: |
+          cp -rf tmp/.github/workflows .github/
+          rm -rf tmp
+
+      # Copy over repository-specific overlay.
+      - uses: actions/checkout@v2
+        with:
+          repository: dasfoo/overlays
+          path: tmp/overlays
+      - run: |
+          if [ -r OVERLAY ]; then
+            cp -rfL "/tmp/overlays/$(<OVERLAY)/." .
+          fi
+          rm -rf tmp
+
+      - uses: peter-evans/create-pull-request@v2
+        with:
+          token: ${{ secrets.FASTLANE_UPDATE_GITHUB_TOKEN }}
+          branch: update-overlays
+          title: "Update overlays"
+          body: "Update overlays"
+          commit-message: "Update overlays"
