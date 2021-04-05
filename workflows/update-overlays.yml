@@ -14,10 +14,10 @@ jobs:
       # Copy over shared workflow overlays.
       - uses: actions/checkout@v2
         with:
-          repository: futureware-tech/.github
+          repository: futureware-tech/template
           # Has to be under the repository directory, otherwise checkout fails.
-          path: tmp/.github
-      - run: cp -rf tmp/.github/workflows .github/
+          path: tmp/template
+      - run: cp -rf tmp/template/.github .
 
       # Copy over repository-specific custom overlay.
       - uses: actions/checkout@v2
